@@ -5,14 +5,13 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
-COPY ["watchdog.csproj", "./"]
-RUN dotnet restore "watchdog.csproj"
 COPY . .
+RUN dotnet restore "watchdog/watchdog.csproj"
 WORKDIR "/src/."
-RUN dotnet build "watchdog.csproj" -c Release -o /app/build
+RUN dotnet build "watchdog/watchdog.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "watchdog.csproj" -c Release -o /app/publish
+RUN dotnet publish "watchdog/watchdog.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
