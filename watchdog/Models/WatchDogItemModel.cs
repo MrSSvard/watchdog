@@ -8,7 +8,7 @@ namespace WatchDog.Models
         [Key]
         string Name { get; set; }
         int FrequencyMinutes { get; set; }
-        DateTime CreatedDate { get; }
+        DateTime CreatedDate { get; set; }
         DateTime ModifiedDate { get; set; }
     }
 
@@ -17,14 +17,7 @@ namespace WatchDog.Models
         [Key]
         public string Name { get; set; }
         public int FrequencyMinutes { get; set; }
-        public DateTime CreatedDate { get; }
+        public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
-
-        public WatchDogItem()
-        {
-            this.CreatedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Stockholm");
-            this.ModifiedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Stockholm");
-        }
     }
 }
-
