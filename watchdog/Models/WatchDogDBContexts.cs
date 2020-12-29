@@ -10,7 +10,7 @@ namespace WatchDog.DBContexts
         {
         }
 
-        public DbSet<WatchDogItem> WatchDogItems { get; set; }
+        public DbSet<IWatchDogItem> WatchDogItems { get; set; }
 
     }
 }
