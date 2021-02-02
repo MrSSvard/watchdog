@@ -75,6 +75,8 @@ public class WatchDogController : ControllerBase
         if (item != null)
         {
             item.LastCheckin = currentTime;
+            _db.Update(item);
+            _db.SaveChanges();
             return Ok(item);
         }
         else
