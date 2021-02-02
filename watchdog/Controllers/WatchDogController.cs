@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using WatchDog.DBContexts;
 using WatchDog.Models;
+using WatchDog.Tools;
 
 [ApiController]
 [Route("[controller]")]
@@ -15,15 +16,29 @@ public class WatchDogController : ControllerBase
         _db = DBContext;
     }
 
-
     [HttpGet]
-    public ObjectResult Get()
+    [Route("items")]
+    public ObjectResult GetItems()
     {
         return Ok(_db.WatchDogItems);
     }
 
-    [Route("{name}")]
     [HttpGet]
+    public ObjectResult GetLateItems()
+    {
+        Dictionary<string, int> LateItems = new Dictionary<string, int>();
+        foreach (IWatchDogItem item in _db.WatchDogItems)
+        {
+            if (item.IsLate())
+            {
+                LateItems.Add(item.Name, item.HowLate());
+            }
+        }
+        return Ok(LateItems);
+    }
+
+    [HttpGet]
+    [Route("items/{name}")]
     public ObjectResult GetItem(string name)
     {
         IWatchDogItem item = _db.WatchDogItems.Find(name);
@@ -39,14 +54,34 @@ public class WatchDogController : ControllerBase
     }
 
     [HttpPost]
-    public ObjectResult Post([FromBody] WatchDogItem item)
+    [Route("items")]
+    public ObjectResult CreateItem([FromBody] WatchDogItem item)
     {
-        DateTime currentTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Stockholm");
+        DateTime currentTime = Tools.CurrentTime();
         item.CreatedDate = currentTime;
         item.ModifiedDate = currentTime;
-
+        item.LastCheckin = currentTime;
         _db.Add(item);
         _db.SaveChanges();
         return Ok(item);
+    }
+
+    [HttpPost]
+    [Route("items/{name}")]
+    public ObjectResult Checkin(string name)
+    {
+        DateTime currentTime = Tools.CurrentTime();
+        var item = _db.WatchDogItems.SingleOrDefault(b => b.Name == name);
+        if (item != null)
+        {
+            item.LastCheckin = currentTime;
+            return Ok(item);
+        }
+        else
+        {
+            var errorResponse = new Dictionary<string, string>();
+            errorResponse.Add("error", "item doesn't exist");
+            return NotFound(errorResponse);
+        }
     }
 }
